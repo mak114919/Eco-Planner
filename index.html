@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Eco-Urban Planner AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 p-10">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-green-700">Eco-Urban Planner: Heat Resilience Advisor</h1>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label>Land Use Type</label>
+                <select id="land_use" class="w-full border p-2 rounded">
+                    <option>Commercial/Downtown</option>
+                    <option>High-Density Residential</option>
+                    <option>Suburban</option>
+                    <option>Green Park</option>
+                </select>
+            </div>
+            <div>
+                <label>Greenness (NDVI: 0 to 1)</label>
+                <input type="number" id="ndvi" value="0.2" step="0.1" class="w-full border p-2 rounded">
+            </div>
+            <div>
+                <label>Albedo (0 to 0.3)</label>
+                <input type="number" id="albedo" value="0.12" step="0.01" class="w-full border p-2 rounded">
+            </div>
+            <div>
+                <label>Building Density %</label>
+                <input type="number" id="density" value="80" class="w-full border p-2 rounded">
+            </div>
+        </div>
+
+        <button onclick="getAdvice()" class="mt-6 w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
+            Analyze Zone Resilience
+        </button>
+
+        <div id="results" class="mt-8 hidden">
+            <h2 class="text-xl font-semibold">AI Prediction: <span id="temp" class="text-red-500">--</span>°C</h2>
+            <div id="advice" class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-sm italic">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function getAdvice() {
+            const payload = {
+                land_use: document.getElementById('land_use').value,
+                ndvi: parseFloat(document.getElementById('ndvi').value),
+                albedo: parseFloat(document.getElementById('albedo').value),
+                density: parseFloat(document.getElementById('density').value),
+                sky_view: 0.5, wind: 2.5, humidity: 50 // Default constants
+            };
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('temp').innerText = result.predicted_temp;
+            document.getElementById('advice').innerHTML = result.recommendations.map(r => `• ${r}`).join('<br>');
+        }
+    </script>
+</body>
+</html>
